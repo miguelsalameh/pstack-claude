@@ -167,9 +167,9 @@ function stateFile() {
   return resolve(repo, git(repo, ["rev-parse", "--git-path", "pstack-update-upstream.json"]));
 }
 
+// Thrown rather than exiting, so the scratch clone's cleanup still runs.
 function fail(message) {
-  console.error(`\nSTOP: ${message}`);
-  process.exit(1);
+  throw new Error(message);
 }
 
 function run(command, args) {
@@ -197,7 +197,7 @@ function syncStep({ clone, target, components, dryRun }) {
   for (const component of changed) {
     const { sha: from, upstreamPath, localPath } = components[component];
     console.log(`\n== ${component}: ${short(from)} -> ${short(target)}`);
-    const { report, failed } = runSync({ component, newSha: target, dryRun, clone });
+    const { report, failed } = runSync({ component, newSha: target, dryRun, clone, nextSteps: false });
     if (failed) {
       fail(
         `the ${component} sync failed on the FAIL lines above and wrote nothing for ${component}.` +
@@ -338,6 +338,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
     main();
   } catch (error) {
-    fail(error.message);
+    console.error(`\nSTOP: ${error.message}`);
+    process.exit(1);
   }
 }

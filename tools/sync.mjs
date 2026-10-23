@@ -504,9 +504,10 @@ function pathsOtherComponentsCarry(clone, components, component) {
 
 // Sync one component to `newSha`, printing the report main() prints. `clone`
 // is an existing clone of upstream.json's remote to reuse; without one, the
-// remote is cloned into a scratch directory. Returns the report and whether
-// the run failed; a failed run writes nothing and leaves the pin alone.
-export function runSync({ component, newSha, dryRun = false, clone = null }) {
+// remote is cloned into a scratch directory. `nextSteps: false` leaves out the
+// closing hint, for a caller that takes those steps itself. Returns the report
+// and whether the run failed; a failed run writes nothing and leaves the pin alone.
+export function runSync({ component, newSha, dryRun = false, clone = null, nextSteps = true }) {
   const upstreamPath = join(repo, "tools/upstream.json");
   const upstream = JSON.parse(readFileSync(upstreamPath, "utf8"));
   const spec = upstream.components[component];
@@ -615,7 +616,7 @@ export function runSync({ component, newSha, dryRun = false, clone = null }) {
     for (const c of report.conflicts) {
       if (c.reason === "removed-upstream") console.log(`  now port-only: ${spec.localPath}/${c.rel}`);
     }
-    console.log("next: resolve the conflict markers, review the diff, write the CHANGES.md entry from this report (name each now port-only file), run bun tools/generate.mjs (it fails while a marker remains)");
+    if (nextSteps) console.log("next: resolve the conflict markers, review the diff, write the CHANGES.md entry from this report (name each now port-only file), run bun tools/generate.mjs (it fails while a marker remains)");
     return { report, failed: false };
   } finally {
     rmSync(scratch, { recursive: true, force: true });

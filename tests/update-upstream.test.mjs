@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -18,8 +18,6 @@ import {
 } from "../tools/update-upstream.mjs";
 
 const repoRoot = fileURLToPath(new URL("..", import.meta.url));
-const scratch = mkdtempSync(join(tmpdir(), "pstack-update-test-"));
-afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
 describe("menuText", () => {
   test("takes the first sentence, lower-cased, without its period", () => {
@@ -181,7 +179,7 @@ describe("release", () => {
 
 describe("changedComponents", () => {
   test("counts a component only when a path it carries changed since its pin", () => {
-    const repo = join(scratch, "upstream");
+    const repo = mkdtempSync(join(tmpdir(), "pstack-update-test-"));
     mkdirSync(join(repo, "a/skills"), { recursive: true });
     mkdirSync(join(repo, "b"), { recursive: true });
     const git = (...args) => execFileSync("git", ["-C", repo, ...args], { encoding: "utf8", env: process.env }).trim();
@@ -203,7 +201,11 @@ describe("changedComponents", () => {
       a: { upstreamPath: "a", sha: pin, exclude: ["README.md"] },
       b: { upstreamPath: "b", sha: pin },
     };
-    expect(changedComponents(repo, components, readmeOnly)).toEqual([]);
-    expect(changedComponents(repo, components, target)).toEqual(["b"]);
+    try {
+      expect(changedComponents(repo, components, readmeOnly)).toEqual([]);
+      expect(changedComponents(repo, components, target)).toEqual(["b"]);
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
   });
 });
