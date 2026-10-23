@@ -259,8 +259,8 @@ export function publicSkills(skillsDir) {
     .map(({ name }) => name);
 }
 
-const COMMANDS_DOC = "docs/reference.md";
-const COMMAND_TABLE_HEADER = "| command | use it when |";
+export const COMMANDS_DOC = "docs/reference.md";
+export const COMMAND_TABLE_HEADER = "| command | use it when |";
 // promptStub writes the menu text unquoted into YAML frontmatter, where ": " or
 // a trailing ":" starts a mapping, " #" starts a comment, and a leading
 // indicator character is a parse error or a different node.

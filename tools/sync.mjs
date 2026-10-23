@@ -502,18 +502,14 @@ function pathsOtherComponentsCarry(clone, components, component) {
     );
 }
 
-function main() {
-  const args = process.argv.slice(2);
-  const dryRun = args.includes("--dry-run");
-  const [component, newSha, ...stray] = args.filter((a) => a !== "--dry-run");
+// Sync one component to `newSha`, printing the report main() prints. `clone`
+// is an existing clone of upstream.json's remote to reuse; without one, the
+// remote is cloned into a scratch directory. Returns the report and whether
+// the run failed; a failed run writes nothing and leaves the pin alone.
+export function runSync({ component, newSha, dryRun = false, clone = null }) {
   const upstreamPath = join(repo, "tools/upstream.json");
   const upstream = JSON.parse(readFileSync(upstreamPath, "utf8"));
   const spec = upstream.components[component];
-  if (stray.length || !spec || !newSha?.match(/^[0-9a-f]{7,40}$/)) {
-    for (const arg of stray) console.error(`unexpected argument: ${JSON.stringify(arg)}`);
-    console.error(`usage: bun tools/sync.mjs <${Object.keys(upstream.components).join("|")}> <new-sha> [--dry-run]`);
-    process.exit(2);
-  }
   const { substitutions, denylist } = parseSubstitutions(
     JSON.parse(readFileSync(join(repo, "tools/substitutions.json"), "utf8")),
   );
@@ -525,10 +521,13 @@ function main() {
 
   const scratch = mkdtempSync(join(tmpdir(), "pstack-sync-"));
   try {
-    console.log(`cloning ${upstream.remote} ...`);
-    git(["clone", "--filter=blob:none", upstream.remote, join(scratch, "clone")]);
+    if (!clone) {
+      console.log(`cloning ${upstream.remote} ...`);
+      clone = join(scratch, "clone");
+      git(["clone", "--filter=blob:none", upstream.remote, clone]);
+    }
     const co = (sha, dest) => {
-      git(["-C", join(scratch, "clone"), "worktree", "add", "--detach", dest, sha]);
+      git(["-C", clone, "worktree", "add", "--detach", dest, sha]);
       return join(dest, spec.upstreamPath);
     };
     const oldDir = co(spec.sha, join(scratch, "old"));
@@ -542,7 +541,7 @@ function main() {
       rules: substitutions,
       denylist,
       exclude: spec.exclude ?? [],
-      carriedElsewhere: pathsOtherComponentsCarry(join(scratch, "clone"), upstream.components, component),
+      carriedElsewhere: pathsOtherComponentsCarry(clone, upstream.components, component),
       derive: (rel, text) => deriveSkill(join(spec.localPath, rel), text, models, leads),
       forks,
       atPin,
@@ -606,10 +605,9 @@ function main() {
       for (const rel of report.undeclared) console.error(`  ${spec.localPath}/${rel}`);
     }
     if (report.binaryConflicts.length || report.collisions.length || report.hits.length || report.undeclared.length || (atPin && (report.stale.length || report.written.length))) {
-      process.exitCode = 1;
-      return;
+      return { report, failed: true };
     }
-    if (dryRun) return;
+    if (dryRun) return { report, failed: false };
 
     upstream.components[component].sha = newSha;
     writeFileSync(upstreamPath, JSON.stringify(upstream, null, 2) + "\n");
@@ -618,9 +616,23 @@ function main() {
       if (c.reason === "removed-upstream") console.log(`  now port-only: ${spec.localPath}/${c.rel}`);
     }
     console.log("next: resolve the conflict markers, review the diff, write the CHANGES.md entry from this report (name each now port-only file), run bun tools/generate.mjs (it fails while a marker remains)");
+    return { report, failed: false };
   } finally {
     rmSync(scratch, { recursive: true, force: true });
   }
+}
+
+function main() {
+  const args = process.argv.slice(2);
+  const dryRun = args.includes("--dry-run");
+  const [component, newSha, ...stray] = args.filter((a) => a !== "--dry-run");
+  const { components } = JSON.parse(readFileSync(join(repo, "tools/upstream.json"), "utf8"));
+  if (stray.length || !components[component] || !newSha?.match(/^[0-9a-f]{7,40}$/)) {
+    for (const arg of stray) console.error(`unexpected argument: ${JSON.stringify(arg)}`);
+    console.error(`usage: bun tools/sync.mjs <${Object.keys(components).join("|")}> <new-sha> [--dry-run]`);
+    process.exit(2);
+  }
+  if (runSync({ component, newSha, dryRun }).failed) process.exitCode = 1;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
