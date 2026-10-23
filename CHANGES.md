@@ -6,7 +6,7 @@ This file is the release changelog, with one `## <version> - <title>` entry per 
 
 Syncs `pstack` from upstream `7b353f7` to `8b3326d` (v0.15.30). Adds the `statechart` skill (12 files). Updated to upstream's text: `plugins/pstack/skills/poteto-help/references/recipes.md`, `plugins/pstack/skills/sharpen/SKILL.md`. Merged with the port's forks: `plugins/pstack/skills/poteto-help/SKILL.md`.
 
-The slash-command table in `docs/reference.md` adds a row for `/statechart`, from the first sentence of the skill's description.
+The slash-command table in `docs/reference.md` adds a row for `/statechart` beside the formal verification skills. Upstream changed `/sharpen` to rewrite the prompt instead of doing the task, so its row now says so.
 
 ## 0.9.102 - The skill link validator keeps angle-bracket destinations
 

@@ -27,7 +27,7 @@ Find each skill's instructions in the [skills tree](../plugins/pstack/skills/).
 | `/technical-writing` | write docs, RFCs, readmes, PR descriptions, and commit messages to one layered standard |
 | `/bro` | restate the last message in plain human language, no jargon |
 | `/in-your-own-words` | play back your goal and the problem before the agent starts |
-| `/sharpen` | aim a task at what you are really after, the way a top expert would, without overspecifying it |
+| `/sharpen` | rewrite a prompt deeper, not bigger, the way a top professional would, before you send it |
 | `/figure-it-out` | design a rigorous, auditable playbook for a task no bundled playbook fits |
 | `/show-me-your-work` | log decisions to a reviewable tsv decision trail |
 | `/blast-radius` | find what a change could break beyond the diff and prove safety by running code |
@@ -41,6 +41,7 @@ Find each skill's instructions in the [skills tree](../plugins/pstack/skills/).
 | `/maintain-verification-skill` | re-sync a drifted verification skill and its feature map |
 | `/create-formal-verification-skill` | generate a project-local skill that formally verifies one high-risk property |
 | `/maintain-formal-verification-skill` | re-sync a formal verification after the code it covers changed |
+| `/statechart` | draw what an app's user sees as a Mermaid statechart from a TLA+ model |
 | `/deslop` | deslop a diff before commit |
 | `/babysit` | monitor an open PR, fix CI/comments, keep it merge-ready |
 | `/thermo-nuclear-review` | audit a branch's changes for bugs, breakage, security issues, devex regressions, and feature-gate leaks |
@@ -51,7 +52,6 @@ Find each skill's instructions in the [skills tree](../plugins/pstack/skills/).
 | `/fix-merge-conflicts` | non-interactively resolve merge conflicts, validate, finalize |
 | `/get-pr-comments` | fetch and summarize review comments from the active PR |
 | `/what-did-i-get-done` | summarize authored commits over a user-chosen period |
-| `/statechart` | draw what an app's user sees as a Mermaid statechart from a TLA+ model |
 
 ## Runtime support
 
