@@ -2,6 +2,12 @@
 
 This file is the release changelog, with one `## <version> - <title>` entry per release, newest first. The Cursor-to-Claude rewrite rules live in [`tools/substitutions.json`](tools/substitutions.json), and the [sync boundary](CONTRIBUTING.md#the-sync-boundary) in `CONTRIBUTING.md` defines how a change to upstream's skill content is declared.
 
+## 0.9.103 - Sync to upstream 8b3326d (v0.15.30): add /statechart
+
+Syncs `pstack` from upstream `7b353f7` to `8b3326d` (v0.15.30). Adds the `statechart` skill (12 files). Updated to upstream's text: `plugins/pstack/skills/poteto-help/references/recipes.md`, `plugins/pstack/skills/sharpen/SKILL.md`. Merged with the port's forks: `plugins/pstack/skills/poteto-help/SKILL.md`.
+
+The slash-command table in `docs/reference.md` adds a row for `/statechart` beside the formal verification skills. Upstream changed `/sharpen` to rewrite the prompt instead of doing the task, so its row now says so.
+
 ## 0.9.102 - The skill link validator keeps angle-bracket destinations
 
 `tools/validate-skills.mjs` now reads a Markdown link destination written in angle brackets, such as `[text](<path with spaces.md>)`, as the path inside the brackets. It used to check the brackets as part of the path, so a link to an existing file was reported as broken. No skill content changed. `tests/agent-skills.test.mjs` covers the case.
